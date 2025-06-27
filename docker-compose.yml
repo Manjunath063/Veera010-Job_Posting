@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./Backend
+    ports:
+      - "3061:3061"
+    environment:
+      - PGUSER=postgres
+      - PGPASSWORD=admin123
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGDATABASE=job_post
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  frontend:
+    build: ./Fronted
+    ports:
+      - "8104:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  hr:
+    build: ./Hr
+    ports:
+      - "8105:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:13
+    ports:
+      - "5461:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: job_post
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+volumes:
+  pgdata:
+
+networks:
+  app-network:
+    driver: bridge
+
